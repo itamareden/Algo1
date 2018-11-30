@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+<meta charset="windows-1255">
+<title>Insert title here</title>
+<style>
+span{
+margin:0 10px;
+}
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+    font-size: 14px;
+    min-width: 146px;
+}
+
+tr:nth-child(even) {
+    /* background-color: #dddddd; */
+}
+.error{
+	background: #f24835 !important;
+}
+.execution{
+	background: #94d8dd !important;
+}
+.general{
+	background: #7cef99 !important;
+}
+</style>
+</head>
+<body>
+<button id="start">Start</button>
+<button id="end" style="margin-left:20px;">End</button>
+<button id="startStrategy" style="margin-left:20px;">Start Strategy</button>
+<button id="stopStrategy" style="margin-left:20px;">Stop Strategy</button>
+<button id="logs" style="margin-left:20px;">Logs</button>
+<button id="equity" style="margin-left:20px;">Equity</button>
+<button id="allThreads" style="margin-left:20px;">Threads</button>
+<button id="activeStrategy" style="margin-left:20px;">Active Strategy</button>
+<button id="marketData" style="margin-left:20px;">Market Data</button>
+<button id="openPositions" style="margin-left:20px;">Open Positions</button>
+<br><br>
+Asset: <input type="text" id="asset" style="margin-right:20px;">
+Direction: <input type="text" id="direction" style="margin-right:20px;">
+Amount: <input type="text" id="amount">
+<button id="placeOrder" style="margin-left:10px;">Place Order</button>
+<div style="margin-top:50px;"></div>
+<div id="result"></div>
+<script>
+var URL = 'http://localhost:8080/Algo1';
+/* var URL = 'http://www.bye-bye-boredom.com'; */
+ $(document).ready(function(){
+	    $("#start").click(function(){
+		 $.ajax({ 
+			    type: 'GET', 
+			    url: URL + '/rest/connection/start/LOGIN/EUR/USD/1Min/400',  
+			    /* data: { password: "qazwsxAAA" },  */
+			    dataType: 'text',
+			    success: function (result) {
+			    	console.log("success!!!!");
+			    	  $("#result").text(result); 
+			    },
+			    error: function (xhr,err){
+			    	console.log("error");
+			    }
+			});
+	    });
+	    $("#end").click(function(){
+			 $.ajax({ 
+				    type: 'GET', 
+	    			url: URL + '/rest/connection/end/LOGOUT',    
+				    /* data: { password: "qazwsxAAA" },  */
+				    dataType: 'text',
+				    success: function (result) {
+				    	console.log("success!!!!");
+				    	  $("#result").text(result); 
+				    },
+				    error: function (xhr,err){
+				    	console.log("error");
+				    }
+			  });
+	    });
+	    $("#startStrategy").click(function(){
+			 $.ajax({ 
+				    type: 'GET', 
+				    url: URL + '/rest/strategy/start/EUR/USD/1Min/400',   
+				    /* data: { password: "qazwsxAAA" },  */
+				    dataType: 'text',
+				    success: function (result) {
+				    	console.log("success!!!!");
+				    	  $("#result").text(result); 
+				    },
+				    error: function (xhr,err){
+				    	console.log("error");
+				    }
+				});
+		    });
+	    $("#stopStrategy").click(function(){
+			 $.ajax({ 
+				    type: 'GET', 
+				    url: URL + '/rest/strategy/stop',  
+				    /* data: { password: "qazwsxAAA" },  */
+				    dataType: 'text',
+				    success: function (result) {
+				    	console.log("success!!!!");
+				    	  $("#result").text(result); 
+				    },
+				    error: function (xhr,err){
+				    	console.log("error");
+				    }
+				});
+		    });
+	    $("#logs").click(function(){
+			 $.ajax({ 
+				    type: 'GET', 
+				    url: URL + '/rest/logs',    
+				    dataType: 'text',
+				    success: function (result) {
+				    	console.log(JSON.parse(result));
+				    	var resultsObj = JSON.parse(result);
+				    	var innerHTML = "<table><tr><th>Time</th><th>Type</th><th>Content</th></tr>";
+				    	for(var i=0; i<resultsObj.length; i++){
+				    		var logTime = resultsObj[i].logTime.localDate.replace(/(\d{4})-(\d{1,2})-(\d{1,2})T(\d{2}:\d{2}:\d{2})[\s\S]*/,"$3\/$2\/$1 $4");
+				    		var logType = resultsObj[i].logType;
+				    		var logContent = resultsObj[i].logContent;
+				    		if(logType == "ERROR"){
+				    			innerHTML += "<tr class='error'>"
+				    		}
+				    		else if(logType == "EXECUTION"){
+				    			innerHTML += "<tr class='execution'>"
+				    		}
+				    		else if(logType == "GENERAL"){
+				    			innerHTML += "<tr class='general'>"
+				    		}
+				    		else{
+				    			innerHTML += "<tr>"
+				    		}
+				    		innerHTML += "<td>"+ logTime +"</td><td>" + logType + "</td><td>" + logContent + "</td></tr>";
+				    	}
+				    	document.querySelector("#result").innerHTML = innerHTML + "</table>"; 
+				    },
+				    error: function (xhr,err){
+				    	console.log("error");
+				    	console.log(xhr);
+				    	console.log(err);
+				    }
+			  });
+	    });
+	    $("#equity").click(function(){
+			 $.ajax({ 
+				    type: 'GET', 
+				    url: URL + '/rest/account2/equity',   
+				    dataType: 'text',
+				    success: function (result) {
+				    	$("#result").text(result);
+				    },
+				    error: function (xhr,err){
+				    	console.log("error");
+				    	console.log(xhr);
+				    	console.log(err);
+				    }
+			  });
+	    });
+	    $("#allThreads").click(function(){
+			 $.ajax({ 
+				    type: 'GET', 
+				    url: URL + '/rest/connection/threads',   
+				    dataType: 'text',
+				    success: function (result) {
+				    	var innerHTML = "<table><tr><th>Name</th><th>State</th></tr>";
+				    	var allThreads = result.match(/Thread Name: [^,]+,\s+State:\s+[A-Z_]*/g);
+				    	var summary = result.match(/Active Threads:[\s\S]+/);
+				    	allThreads.forEach(function(text){
+				    		innerHTML += "<tr><td>" + text.substring(0, text.indexOf("State:")) + "</td>";
+				    		innerHTML += "<td>" + text.substring(text.indexOf("State:")) + "</td></tr>";
+				    	})
+				    	/* innerHTML += summary[0]; */
+				    	innerHTML += "</table><br>" + summary[0];
+				    	$("#result").html(innerHTML);
+				    },
+				    error: function (xhr,err){
+				    	console.log("error");
+				    	console.log(xhr);
+				    	console.log(err);
+				    }
+			  });
+	    });
+	    $("#activeStrategy").click(function(){
+			 $.ajax({ 
+				    type: 'GET', 
+				    url: URL + '/rest/strategy/activeStrategy',   
+				    dataType: 'text',
+				    success: function (result) {
+				    	$("#result").text(result);
+				    },
+				    error: function (xhr,err){
+				    	console.log("error");
+				    	console.log(xhr);
+				    	console.log(err);
+				    }
+			  });
+	    });
+	    $("#marketData").click(function(){
+			 $.ajax({ 
+				    type: 'GET', 
+				    url: URL + '/rest/strategy/marketData',   
+				    dataType: 'text',
+				    success: function (result) {
+				    	console.log(result)
+				    	resultStr = "";
+				    	var candlesArr = result.match(/CandleStick\W+\[(([\s\S])(?!\]))+.\]/g);
+				    	candlesArr.forEach(function(candle){
+				    		resultStr += candle + "<br>";
+				    		
+				    	})
+				    	$("#result").html(resultStr);
+				    },
+				    error: function (xhr,err){
+				    	console.log("error");
+				    	console.log(xhr);
+				    	console.log(err);
+				    }
+			  });
+	    });
+	    $("#openPositions").click(function(){
+			 $.ajax({ 
+				    type: 'GET', 
+				    url: URL + '/rest/account2/openPositions',   
+				    dataType: 'json',
+				    success: function (result) {
+				    	var innerHTML = "<table><tr><th>Symbol</th><th>Quantity</th><th>Average Price</th></tr>";
+				    	result.forEach(function(obj){
+				    		innerHTML += "<tr><td>" + obj["assetName"] + "</td><td>" + obj["quantity"] + "</td>"
+				    					+ "<td>" + obj["averagePrice"] + "</td></tr>";
+				    	});
+				    	innerHTML += "</table><br>";
+				    	$("#result").html(innerHTML);
+				    	console.log(result);
+				    	console.log(JSON.stringify(result))
+				    	$("#result").html(innerHTML);
+				    },
+				    error: function (xhr,err){
+				    	console.log("error");
+				    	console.log(xhr);
+				    	console.log(err);
+				    }
+			  });
+	    });
+	    $("#placeOrder").click(function(){
+	    	var asset = $("#asset").val();
+	    	var direction = $("#direction").val();
+	    	var amount = $("#amount").val();
+	    	console.log(asset + ", " + direction + ", " + amount);
+			 $.ajax({ 
+				    type: 'GET', 
+				    url: URL + '/rest/account2/sendMarketOrder/' + asset.toString() + "/" + direction.toString() + "/" + amount.toString() ,
+				    /* url: URL + '/rest/logs/jjj', */
+				    dataType: 'text',
+				    success: function (result) {
+				    	$("#result").html(result);
+				    },
+				    error: function (xhr,err){
+				    	console.log("error");
+				    	console.log(xhr);
+				    	console.log(err);
+				    }
+			  });
+	    });
+	    
+ });
+ </script>
+</body>
+</html>
